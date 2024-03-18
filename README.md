@@ -1,0 +1,5 @@
+1. Describe how your exchange works.
+My exchange starts by reading the product file. For each trader given in the command line arguments, corresponding FIFOs are created, followed by forking. Then the parent process will open both FIFOs and add all trader information into a trader struct, which is added into an array of traders. In the child, it uses execl to run the trader binary. After launching the traders, it will wait for SIGUSR1. Once received, it will find the trader that sent the signal then read the message sent through the FIFO, followed by parsing the message. Depending on the command, the exchange will carry out the instructions or deem the command as invalid. After execution of the command, relevant messages and signals are sent out to the traders. It also listens for SIGCHLD to find disconnected traders. When all traders disconnect, all dynamically allocated memory is freed and FIFOs are cleaned up.
+
+2. Describe your design decisions for the trader and how it's fault-tolerant.
+For the trader, it only reads from the FIFO after receiving SIGUSR1, which forces blocking on pipe reads before getting a signal from the exchange.
